@@ -19,6 +19,7 @@ go get -u github.com/sbani/wassit
 ```
 
 ## How
+```
 A fast and simple request http proxy
                 with easy to use configuration options
                 created by sbani in Go.
@@ -30,6 +31,7 @@ Flags:
   -l, --listen string     Host and port that the wassit server is listening to (default ":9001")
   -s, --socks5 string     Use a socks5 socks for connections to the target
   -t, --tor               Enable tor socks5 proxy usage. Please don't forget to start tor
+```
 
 ## Examples
 Easiest way to start wassit
