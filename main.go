@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
 	"net"
@@ -70,6 +71,7 @@ func createHTTPTransport() (*http.Transport, error) {
 	tr := &http.Transport{
 		MaxIdleConns:    10,
 		IdleConnTimeout: 30 * time.Second,
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
 	// Use socks proxy to tunnel traffic
