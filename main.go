@@ -7,7 +7,6 @@ import (
 	"net"
 	"net/http"
 	"net/url"
-	"os"
 	"strings"
 	"time"
 
@@ -21,6 +20,8 @@ var (
 	socks          string
 	host           string
 	followRedirect bool
+	quiet          bool
+	log            logger
 )
 
 var cmdRoot = &cobra.Command{
@@ -45,16 +46,26 @@ var cmdRoot = &cobra.Command{
 			socks = "127.0.0.1:9150"
 		}
 
-		fmt.Fprintln(os.Stdout, "Starting reverse host")
-		fmt.Fprintf(os.Stdout, "Server running on %s\n", host)
-		fmt.Fprintf(os.Stdout, "Pushing request to %s\n", targetURL)
+		log = newLogger(quiet)
+
+		if !quiet {
+			fmt.Printf(`
+__        __            _ _
+\ \      / /_ _ ___ ___(_) |_
+ \ \ /\ / / _  / __/ __| | __|
+  \ V  V / (_| \__ \__ \ | |_
+   \_/\_/ \__,_|___/___/_|\__|
+Running on: %s
+Proxying to: %s
+			`, host, targetURL)
+		}
 
 		if socks != "" {
-			fmt.Fprintf(os.Stdout, "Using socks proxy %s\n", socks)
+			log.Infof("Using socks proxy %s\n", socks)
 		}
 
 		err = RunServer(targetURL)
-		fmt.Fprintf(os.Stderr, "Server stopped due to the following error:\n%s", err)
+		log.Errorf("Server stopped due to the following error:\n%s", err)
 
 		return nil
 	},
@@ -65,6 +76,7 @@ func init() {
 	cmdRoot.PersistentFlags().StringVarP(&socks, "socks5", "s", "", "Use a socks5 socks for connections to the target")
 	cmdRoot.PersistentFlags().BoolP("tor", "t", false, "Enable tor socks5 proxy usage. Please don't forget to start tor")
 	cmdRoot.PersistentFlags().BoolVarP(&followRedirect, "follow-redirect", "f", false, "Follow the first redirect (if present) and proxies content")
+	cmdRoot.PersistentFlags().BoolVarP(&quiet, "quiet", "q", false, "Do not log output to sdtout. Silent mode")
 }
 
 func createHTTPTransport() (*http.Transport, error) {
@@ -99,7 +111,7 @@ func getRequest(method string, url string) (resp *http.Response, err error) {
 	client := http.DefaultClient
 	t, tErr := createHTTPTransport()
 	if tErr != nil {
-		fmt.Fprint(os.Stderr, tErr.Error())
+		log.Critical(tErr.Error())
 		return
 	}
 	client.Transport = t
@@ -129,6 +141,8 @@ func RunServer(target *url.URL) error {
 
 		w.WriteHeader(response.StatusCode)
 		io.Copy(w, response.Body)
+
+		log.Infof("Request: %s %s - Response: %d", r.Method, r.URL, response.StatusCode)
 	})
 
 	return http.ListenAndServe(host, nil)
@@ -137,7 +151,6 @@ func RunServer(target *url.URL) error {
 // main it baby
 func main() {
 	if err := cmdRoot.Execute(); err != nil {
-		fmt.Fprint(os.Stderr, err)
-		os.Exit(1)
+		log.Critical(err.Error())
 	}
 }
