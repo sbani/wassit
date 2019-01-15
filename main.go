@@ -46,7 +46,7 @@ var cmdRoot = &cobra.Command{
 			socks = "127.0.0.1:9150"
 		}
 
-		log = newLogger(quiet)
+		log = simpleLogger(quiet)
 
 		if !quiet {
 			fmt.Printf(`

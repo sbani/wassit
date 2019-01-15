@@ -13,7 +13,7 @@ type logger struct {
 	errOutput  io.Writer
 }
 
-func newLogger(quiet bool) logger {
+func simpleLogger(quiet bool) logger {
 	var errOut, infoOut io.Writer
 	if quiet {
 		errOut, infoOut = ioutil.Discard, ioutil.Discard
@@ -28,24 +28,24 @@ func newLogger(quiet bool) logger {
 }
 
 func (l logger) Errorf(format string, in ...interface{}) {
-	log.Error(fmt.Sprintf(format, in))
+	l.Error(fmt.Sprintf(format, in...))
 }
 
 func (l logger) Error(msg string) {
-	log.print(l.errOutput, msg)
+	l.print(l.errOutput, msg)
 }
 
 func (l logger) Critical(msg string) {
-	log.print(l.errOutput, msg)
+	l.print(l.errOutput, msg)
 	os.Exit(1)
 }
 
 func (l logger) Infof(format string, in ...interface{}) {
-	log.Info(fmt.Sprintf(format, in))
+	l.Info(fmt.Sprintf(format, in...))
 }
 
 func (l logger) Info(msg string) {
-	log.print(l.infoOutput, msg)
+	l.print(l.infoOutput, msg)
 }
 
 func (l logger) print(writer io.Writer, msg string) {
