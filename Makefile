@@ -11,6 +11,9 @@ all: test build
 build:
 	# Build binary
 	$(GOBUILD) -o $(BIN_DIR)/$(BINARY_NAME) -v
+update:
+	go get -u
+	go mod tidy
 test:
 	# Run tests
 	$(GOTEST) -v ./...
@@ -23,10 +26,6 @@ run:
 	# Run binary
 	$(GOBUILD) -o $(BIN_DIR)/$(BINARY_NAME) -v ./...
 	./$(BINARY_NAME)
-deps:
-	# Install dependencires
-	$(GOGET) github.com/golang/dep
-	dep ensure
 
 
 # Cross compilation
