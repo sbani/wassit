@@ -21,7 +21,7 @@ var (
 	host           string
 	followRedirect bool
 	quiet          bool
-	log            logger
+	log            Logger
 )
 
 var cmdRoot = &cobra.Command{
@@ -45,8 +45,6 @@ var cmdRoot = &cobra.Command{
 		if t, terr := cmd.PersistentFlags().GetBool("tor"); terr == nil && t {
 			socks = "127.0.0.1:9150"
 		}
-
-		log = simpleLogger(quiet)
 
 		if !quiet {
 			fmt.Printf(`
@@ -150,6 +148,8 @@ func RunServer(target *url.URL) error {
 
 // main it baby
 func main() {
+	log = NewSimpleLogger(quiet)
+
 	if err := cmdRoot.Execute(); err != nil {
 		log.Critical(err.Error())
 	}
